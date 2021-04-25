@@ -1,25 +1,82 @@
-import logo from './logo.svg';
 import './App.css';
+import React, { useEffect, useState } from "react";
+import Weather from './weather';
+import Hourly from './hourly';
+import Daily from './daily';
+import { render } from '@testing-library/react';
+var city;
+//pro.openweathermap.org/data/2.5/forecast/hourly?lat={lat}&lon={lon}&appid={API key}
+//const REACT_APP_API_KEY = 78d1ea06ba2e72a2f0a6bf0760a4c12e;
+export default function App() {
+  
+  const [lat, setLat] = useState([]);
+  const [long, setLong] = useState([]);
+  const [data, setData] = useState([]);
+  var [daily, setD] = useState(1);
+  //var daily = 0;
+  useEffect(() => {
+    const fetchData = async () => {
+      const url = new URL("https://api.openweathermap.org/data/2.5/onecall");
+     // const url2 = new URL("https://api.openweathermap.org/data/2.5/forecast/hourly");
+      navigator.geolocation.getCurrentPosition(function(position) {
+        setLat(position.coords.latitude);
+        setLong(position.coords.longitude);
+      });
 
-function App() {
+      await fetch(`${url}?lat=${lat}&lon=${long}&units=metric&APPID=78d1ea06ba2e72a2f0a6bf0760a4c12e`)
+      .then(res => res.json())
+      .then(result => {
+        setData(result)
+       // console.log(result);
+      });
+      
+    }
+  
+    fetchData();
+  }, [lat,long])
+  // <pre>{JSON.stringify(data, undefined, 4)}</pre>
+ const current = () =>
+ {
+   setD(1);
+ }
+ const day = () =>
+ {
+  setD(3);
+ }
+ const hourly = () =>
+ {
+  setD(2);
+ }
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      
+     <button onClick={ ()=>current()}>Current Weather</button>
+     <button onClick = {()=>hourly()}>Hourly Weather</button>
+     <button onClick = {()=>day()}>Daily Weather</button>
+    
+      {(typeof data.current != 'undefined'&& daily===1) ? (
+        
+          <Weather weatherData={data}/>
+      ): (
+        
+    
+        <div></div>
+
+        
+      )}
+     {(typeof data.current != 'undefined'&& daily===2) ? (
+        <Hourly weatherData={data}/>
+      ): (
+        <div></div>
+      )}
+      
+      {(typeof data.current != 'undefined'&& daily===3) ? (
+        <Daily weatherData={data}/>
+      ): (
+        <div>
+          
+        </div>
+      )}
     </div>
   );
 }
-
-export default App;
